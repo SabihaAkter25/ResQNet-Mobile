@@ -12,7 +12,7 @@ class ResQNetApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'ResQNet',
+      title: 'INCISYNC',
       debugShowCheckedModeBanner: false,
 
       theme: AppTheme.lightTheme,

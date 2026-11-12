@@ -207,12 +207,14 @@ class _ReportEventScreenState extends State<ReportEventScreen> {
                           Icons.sync_rounded,
                           color: Colors.amber.shade900,
                         ),
-                        const SizedBox(width: 2),
-                        Text(
-                          'Report Synchronization ($pendingCount Pending)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade900,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Report Synchronization ($pendingCount Pending)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber.shade900,
+                            ),
                           ),
                         ),
                       ],

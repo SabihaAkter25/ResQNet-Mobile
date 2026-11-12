@@ -20,6 +20,14 @@ class EventRepository {
     return await AppDatabase.getSavedDisasterEvents();
   }
 
+  Future<List<Map<String, dynamic>>> getActiveReports() async {
+    final reports = await getSavedReports();
+
+    return reports.where((report) {
+      return report['status'] == 'ACTIVE';
+    }).toList();
+  }
+
 
   Future<List<Map<String, Object?>>> getPendingReports() async {
     return await AppDatabase.getPendingDisasterEvents();
@@ -43,6 +51,15 @@ class EventRepository {
   Future<bool> markReportAsSynced(String localId) async {
     final updatedRows =
         await AppDatabase.markDisasterEventAsSynced(localId);
+
+    return updatedRows > 0;
+  }
+
+  Future<bool> resolveReport(String localId) async {
+    final updatedRows = await AppDatabase.updateReportStatus(
+      localId: localId,
+      status: 'RESOLVED',
+    );
 
     return updatedRows > 0;
   }

@@ -1,107 +1,220 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_theme.dart';
 import '../../../../app/widgets/resqnet_logo.dart';
+import '../../../emergency_contacts/presentation/screens/emergency_contacts_screen.dart';
+import '../../../events/presentation/screens/events_feed_screen.dart';
+import '../../../events/presentation/screens/my_reports_screen.dart';
+import '../../../hospitals/presentation/screens/nearby_hospitals_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../../sos/presentation/screens/sos_screen.dart';
+import '../widgets/live_map_preview.dart';
 
 /// Home Dashboard UI Screen for ResQNet.
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // ignore: prefer_final_fields
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: const Row(
-          children: [
-            ResQNetLogo(
-              size: 26,
-              showText: false,
-            ),
-            SizedBox(width: 10),
-            Text(
-              'ResQNet',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF1E293B),
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Notifications feature coming soon!'),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Color(0xFF334155),
-              size: 26,
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildWelcomeHeader(),
-              const SizedBox(height: 20),
-              _buildSosButton(context),
-              const SizedBox(height: 24),
-              _buildMapPreviewCard(),
-              const SizedBox(height: 24),
-              const Text(
-                'Emergency Overview',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
-                  letterSpacing: -0.2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: (_currentIndex == 1 || _currentIndex == 2 || _currentIndex == 3)
+          ? null
+          : AppBar(
+              backgroundColor: Colors.white.withValues(alpha: 0.9),
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              title: const Row(
                 children: [
-                  Expanded(
-                    child: _buildSummaryCard(
-                      title: 'Active Events',
-                      subtitle: '3 Alerts Nearby',
-                      icon: Icons.warning_amber_rounded,
-                      iconBgColor:
-                          AppTheme.primaryRed.withValues(alpha: 0.12),
-                      iconColor: AppTheme.primaryRed,
-                    ),
+                  ResQNetLogo(
+                    size: 26,
+                    showText: false,
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _buildSummaryCard(
-                      title: 'Nearby Hospitals',
-                      subtitle: '5 Rescue Units',
-                      icon: Icons.local_hospital_rounded,
-                      iconBgColor:
-                          const Color(0xFF0288D1).withValues(alpha: 0.12),
-                      iconColor: const Color(0xFF0288D1),
+                  SizedBox(width: 10),
+                  Text(
+                    'INCISYNC',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1E293B),
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Notifications feature coming soon!'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: Color(0xFF334155),
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+      body: _currentIndex == 1
+          ? const EventsFeedScreen()
+          : _currentIndex == 2
+              ? const MyReportsScreen()
+              : _currentIndex == 3
+                  ? const ProfileScreen()
+                  : SafeArea(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildWelcomeHeader(),
+                            const SizedBox(height: 20),
+                            _buildSosButton(context),
+                            const SizedBox(height: 24),
+                            _buildMapPreviewCard(),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Emergency Overview',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildSummaryCard(
+                                    title: 'Active Events',
+                                    subtitle: '3 Alerts Nearby',
+                                    icon: Icons.warning_amber_rounded,
+                                    iconBgColor:
+                                        AppTheme.primaryRed.withValues(alpha: 0.12),
+                                    iconColor: AppTheme.primaryRed,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(18),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const NearbyHospitalsScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: _buildSummaryCard(
+                                      title: 'Nearby Hospitals',
+                                      subtitle: 'Find Hospitals',
+                                      icon: Icons.local_hospital_rounded,
+                                      iconBgColor:
+                                          const Color(0xFF0288D1).withValues(alpha: 0.12),
+                                      iconColor: const Color(0xFF0288D1),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(18),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const EmergencyContactsScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: _buildSummaryCard(
+                                      title: 'Emergency Contacts',
+                                      subtitle: 'Trusted People',
+                                      icon: Icons.contact_phone_rounded,
+                                      iconBgColor: const Color(0xFFE53935).withValues(alpha: 0.12),
+                                      iconColor: const Color(0xFFE53935),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+    );
+  }
+
+  /// Glassmorphic Welcome heading card
+  Widget _buildWelcomeHeader() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.90),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Stay Safe, Rescuer 👋',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Stay alert. Real-time disaster reports and community aid resources are available nearby.',
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.45,
+                  color: Colors.grey.shade700,
+                ),
+              ),
             ],
           ),
         ),
@@ -109,49 +222,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Welcome heading card displaying user branding and safety message
-  Widget _buildWelcomeHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Stay Safe, Rescuer 👋',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Stay alert. Real-time disaster reports and community aid resources are available nearby.',
-            style: TextStyle(
-              fontSize: 13,
-              height: 1.45,
-              color: Colors.grey.shade700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Prominent Red SOS Emergency Button
+  /// Prominent Red SOS Emergency Button with Glassmorphic feel
   Widget _buildSosButton(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -183,10 +254,10 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('EMERGENCY SOS Triggered! Nearby responders notified.'),
-              backgroundColor: AppTheme.primaryRed,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SosScreen(),
             ),
           );
         },
@@ -212,74 +283,10 @@ class HomeScreen extends StatelessWidget {
 
   /// Map Preview Card Placeholder
   Widget _buildMapPreviewCard() {
-    return Container(
-      width: double.infinity,
-      height: 170,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF334155)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Tactical grid pattern overlay
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.12,
-              child: CustomPaint(
-                painter: _MapGridPainter(),
-              ),
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryRed.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.location_on_rounded,
-                    size: 32,
-                    color: AppTheme.primaryRed,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Map preview',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Live map coming soon',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white60,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return const LiveMapPreview();
   }
 
-  /// Reusable Summary Card Component
+  /// Reusable Glassmorphic Summary Card Component
   Widget _buildSummaryCard({
     required String title,
     required String subtitle,
@@ -290,14 +297,14 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.90),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -334,25 +341,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Custom painter to draw a subtle grid pattern for the map placeholder
-class _MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 1.0;
-
-    const step = 20.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

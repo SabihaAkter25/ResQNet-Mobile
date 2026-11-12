@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_theme.dart';
+
 import '../../../events/presentation/screens/events_feed_screen.dart';
 import '../../../events/presentation/screens/my_reports_screen.dart';
 import '../../../events/presentation/screens/report_event_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 import 'home_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -20,109 +21,77 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     EventsFeedScreen(),
     ReportEventScreen(),
     MyReportsScreen(),
-    _PlaceholderScreen(
-      icon: Icons.person_outline_rounded,
-      title: 'Your Profile',
-      message: 'Profile and settings will be added here.',
-    ),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.dynamic_feed_outlined),
-            selectedIcon: Icon(Icons.dynamic_feed_rounded),
-            label: 'Events',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_location_alt_outlined),
-            selectedIcon: Icon(Icons.add_location_alt_rounded),
-            label: 'Report',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.assignment_outlined),
-            selectedIcon: Icon(Icons.assignment_rounded),
-            label: 'My Reports',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.lightBackground,
-      appBar: AppBar(
-        title: const Text(
-          'ResQNet',
-          style: TextStyle(fontWeight: FontWeight.bold),
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          elevation: 8,
+          indicatorColor: Colors.red.withValues(alpha: 0.12),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFEF3340),
+              );
+            }
+            return const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF64748B),
+            );
+          }),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: Color(0xFFEF3340));
+            }
+            return const IconThemeData(color: Color(0xFF64748B));
+          }),
         ),
-        backgroundColor: AppTheme.lightBackground,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 64,
-                color: AppTheme.primaryRed,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
+        child: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.dynamic_feed_outlined),
+              selectedIcon: Icon(Icons.dynamic_feed_rounded),
+              label: 'Events',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.add_location_alt_outlined),
+              selectedIcon: Icon(Icons.add_location_alt_rounded),
+              label: 'Report',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.assignment_outlined),
+              selectedIcon: Icon(Icons.assignment_rounded),
+              label: 'MyReports',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
         ),
       ),
     );

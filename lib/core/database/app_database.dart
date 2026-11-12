@@ -16,13 +16,15 @@ class AppDatabase {
     return _database!;
   }
 
+  static const int _databaseVersion = 3;
+
   static Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'resqnet.db');
 
     return await openDatabase(
       path,
-      version: 1,
+      version: _databaseVersion,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE disaster_events (
@@ -32,9 +34,44 @@ class AppDatabase {
             longitude REAL NOT NULL,
             description TEXT NOT NULL,
             local_created_at TEXT NOT NULL,
-            sync_status TEXT NOT NULL DEFAULT 'PENDING'
+            sync_status TEXT NOT NULL DEFAULT 'PENDING',
+            status TEXT NOT NULL DEFAULT 'ACTIVE',
+            expires_at TEXT
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE emergency_contacts (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            relationship TEXT,
+            created_at TEXT NOT NULL
+          )
+        ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('''
+            CREATE TABLE emergency_contacts (
+              id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              phone TEXT NOT NULL,
+              relationship TEXT,
+              created_at TEXT NOT NULL
+            )
+          ''');
+        }
+
+        if (oldVersion < 3) {
+          await db.execute(
+            "ALTER TABLE disaster_events ADD COLUMN status TEXT NOT NULL DEFAULT 'ACTIVE'",
+          );
+
+          await db.execute(
+            'ALTER TABLE disaster_events ADD COLUMN expires_at TEXT',
+          );
+        }
       },
     );
   }
@@ -115,6 +152,20 @@ class AppDatabase {
     );
   }
 
+  static Future<int> updateReportStatus({
+    required String localId,
+    required String status,
+  }) async {
+    final db = await database;
+
+    return await db.update(
+      'disaster_events',
+      {'status': status},
+      where: 'local_id = ?',
+      whereArgs: [localId],
+    );
+  }
+
   static Future<void> debugSavedDisasterEvents() async {
     final events = await getSavedDisasterEvents();
 
@@ -127,5 +178,70 @@ class AppDatabase {
     }
 
     debugPrint('Total saved reports: ${events.length}');
+  }
+
+  // Save emergency contact
+  static Future<String> saveEmergencyContact({
+    required String name,
+    required String phone,
+    String? relationship,
+  }) async {
+    final db = await database;
+    final id = _uuid.v4();
+
+    await db.insert(
+      'emergency_contacts',
+      {
+        'id': id,
+        'name': name,
+        'phone': phone,
+        'relationship': relationship,
+        'created_at': DateTime.now().toIso8601String(),
+      },
+    );
+
+    return id;
+  }
+
+  // Get all emergency contacts
+  static Future<List<Map<String, Object?>>> getEmergencyContacts() async {
+    final db = await database;
+
+    return await db.query(
+      'emergency_contacts',
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  // Update emergency contact
+  static Future<int> updateEmergencyContact({
+    required String id,
+    required String name,
+    required String phone,
+    String? relationship,
+  }) async {
+    final db = await database;
+
+    return await db.update(
+      'emergency_contacts',
+      {
+        'name': name,
+        'phone': phone,
+        'relationship': relationship,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Delete emergency contact
+  static Future<int> deleteEmergencyContact(String id) async {
+    final db = await database;
+
+    return await db.delete(
+      'emergency_contacts',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

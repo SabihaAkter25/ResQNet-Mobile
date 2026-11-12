@@ -194,14 +194,14 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
   }
 
   Widget _buildReportCard(Map<String, Object?> report) {
+    final localId = report['local_id']?.toString() ?? '';
+    final incidentStatus = report['status']?.toString() ?? 'ACTIVE';
     final eventType = report['event_type']?.toString() ?? 'UNKNOWN';
     final description = report['description']?.toString() ?? '';
     final status = report['sync_status']?.toString() ?? 'PENDING';
     final latitude = report['latitude']?.toString() ?? 'N/A';
     final longitude = report['longitude']?.toString() ?? 'N/A';
     final createdAt = report['local_created_at']?.toString() ?? '';
-
-    final isSynced = status == 'SYNCED';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -215,9 +215,11 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
         borderRadius: BorderRadius.circular(16),
         onTap: () {
           _showReportDetails(
+            localId: localId,
             eventType: eventType,
             description: description,
             status: status,
+            incidentStatus: incidentStatus,
             latitude: latitude,
             longitude: longitude,
             createdAt: createdAt,
@@ -253,38 +255,13 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                     ),
                   ),
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSynced
-                          ? Colors.green.withValues(alpha: 0.10)
-                          : Colors.orange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isSynced
-                              ? Icons.cloud_done
-                              : Icons.cloud_upload_outlined,
-                          size: 14,
-                          color: isSynced ? Colors.green : Colors.orange,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          status,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isSynced ? Colors.green : Colors.orange,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildStatusBadge(status),
+                      const SizedBox(height: 5),
+                      _buildIncidentStatusBadge(incidentStatus),
+                    ],
                   ),
                 ],
               ),
@@ -349,6 +326,46 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
     );
   }
 
+  Widget _buildStatusBadge(String status) {
+    final isSynced = status == 'SYNCED';
+
+    return _buildBadge(
+      status,
+      isSynced ? Colors.green : Colors.orange,
+    );
+  }
+
+  Widget _buildIncidentStatusBadge(String status) {
+    final color = status == 'RESOLVED'
+        ? Colors.green
+        : status == 'EXPIRED'
+            ? Colors.grey
+            : Colors.blue;
+
+    return _buildBadge(status, color);
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 9,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -382,9 +399,11 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
   }
 
   void _showReportDetails({
+    required String localId,
     required String eventType,
     required String description,
     required String status,
+    required String incidentStatus,
     required String latitude,
     required String longitude,
     required String createdAt,
@@ -428,7 +447,27 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                 _detailRow('Latitude', latitude),
                 _detailRow('Longitude', longitude),
                 _detailRow('Sync Status', status),
+                _detailRow('Incident Status', incidentStatus),
                 _detailRow('Reported At', _formatDate(createdAt)),
+                if (incidentStatus == 'ACTIVE') ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _resolveReport(localId);
+                      },
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('Mark as Resolved'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
               ],
             ),
@@ -436,6 +475,45 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
         );
       },
     );
+  }
+
+  Future<void> _resolveReport(String localId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Resolve Report?'),
+        content: const Text(
+          'Are you sure this disaster incident has been resolved?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final success = await _repository.resolveReport(localId);
+
+    if (!mounted) return;
+
+    if (success) {
+      setState(_loadReports);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Report marked as resolved.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   Widget _detailRow(String title, String value) {

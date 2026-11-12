@@ -178,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                   SizedBox(height: 6),
                                   Text(
-                                    'Join ResQNet and help keep your '
+                                    'Join INCISYNC and help keep your '
                                         'community safe.',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(

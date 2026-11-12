@@ -34,7 +34,7 @@ class ResQNetLogo extends StatelessWidget {
         if (showText) ...[
           const SizedBox(height: 8),
           Text(
-            'ResQNet',
+            'INCISYNC',
             style: TextStyle(
               fontSize: size * 0.58,
               fontWeight: FontWeight.w900,
