@@ -19,7 +19,7 @@ class NotificationService {
       iOS: darwinSettings,
     );
 
-    await _notificationsPlugin.initialize(settings);
+    await _notificationsPlugin.initialize(settings: settings);
 
     final androidImplementation =
         _notificationsPlugin.resolvePlatformSpecificImplementation<
@@ -57,11 +57,14 @@ class NotificationService {
       iOS: iosDetails,
     );
 
+    final notificationId =
+        (DateTime.now().millisecondsSinceEpoch ~/ 1000) & 0x7FFFFFFF;
+
     await _notificationsPlugin.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      notificationDetails,
+      id: notificationId,
+      title: title,
+      body: body,
+      notificationDetails: notificationDetails,
       payload: payload,
     );
   }
